@@ -19,8 +19,11 @@ class RoundDetailsPage extends StatelessWidget {
     return StoreConnector<AppState, _ViewModel>(
       vm: () => _Factory(this),
       builder: (context, vm) => Scaffold(
+        backgroundColor: const Color(0xFF0F1713), // Match home background
         appBar: AppBar(
-          title: const Text('ROUND SUMMARY'),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          title: const Text('ROUND SUMMARY', style: TextStyle(fontSize: 12, letterSpacing: 2)),
           actions: [
             if (game.id != null)
               IconButton(
@@ -33,7 +36,7 @@ class RoundDetailsPage extends StatelessWidget {
           physics: const BouncingScrollPhysics(),
           slivers: [
             if (game.isLive) _buildResumeAction(context),
-            _buildSummaryHeader(),
+            _buildBentoDetailsHeader(),
             _buildLeaderboardHeader(),
             _buildLeaderboardList(),
             _buildHoleByHoleHeader(),
@@ -49,25 +52,26 @@ class RoundDetailsPage extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        title: const Text('DELETE ROUND?', style: TextStyle(fontWeight: FontWeight.w900)),
-        content: const Text('This will permanently remove this round from your history.'),
+        backgroundColor: const Color(0xFF151917),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: const Text('DELETE ROUND?', style: TextStyle(fontWeight: FontWeight.w900, color: Colors.white)),
+        content: const Text('This will permanently remove this round from your history.', style: TextStyle(color: Colors.white60)),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('CANCEL')),
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('CANCEL', style: TextStyle(color: Colors.white38))),
           TextButton(
             onPressed: () {
               vm.onDelete(game.id!);
               Navigator.pop(context); // Close dialog
               Navigator.pop(context); // Exit details page
             },
-            child: const Text('DELETE', style: TextStyle(color: Colors.redAccent)),
+            child: const Text('DELETE', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
     );
   }
 
-  /// High-impact call to action for active rounds, allowing users to jump back into the scoring interface.
+  /// High-impact call to action for active rounds.
   Widget _buildResumeAction(BuildContext context) {
     return SliverToBoxAdapter(
       child: GestureDetector(
@@ -79,8 +83,8 @@ class RoundDetailsPage extends StatelessWidget {
           margin: const EdgeInsets.fromLTRB(24, 0, 24, 8),
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: AppColors.primary,
-            borderRadius: BorderRadius.circular(24),
+            color: AppColors.bentoGreen,
+            borderRadius: BorderRadius.circular(32),
           ),
           child: const Row(
             children: [
@@ -91,7 +95,7 @@ class RoundDetailsPage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('ROUND IN PROGRESS', style: TextStyle(
-                      color: Colors.black, 
+                      color: Colors.black54, 
                       fontWeight: FontWeight.w900, 
                       fontSize: 10,
                       letterSpacing: 1.0,
@@ -104,7 +108,7 @@ class RoundDetailsPage extends StatelessWidget {
                   ],
                 ),
               ),
-              Icon(Icons.arrow_forward_rounded, color: Colors.black),
+              Icon(Icons.arrow_forward_rounded, color: Colors.black26),
             ],
           ),
         ),
@@ -112,55 +116,80 @@ class RoundDetailsPage extends StatelessWidget {
     );
   }
 
-  /// Displays the top-level round information like date and total holes.
-  Widget _buildSummaryHeader() {
+  /// New Bento-style header for round details
+  Widget _buildBentoDetailsHeader() {
     final dateStr = DateFormat('MMMM d, yyyy').format(game.dateCreated);
-    return SliverToBoxAdapter(
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
+    return SliverPadding(
+      padding: const EdgeInsets.all(24),
+      sliver: SliverToBoxAdapter(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(dateStr.toUpperCase(), style: const TextStyle(
-              fontSize: 10, 
-              letterSpacing: 2, 
-              fontWeight: FontWeight.w900,
-              color: AppColors.primary,
-            )),
-            const SizedBox(height: 12),
-            Text(game.courseName.toUpperCase(), style: const TextStyle(
-              fontSize: 32, 
-              fontWeight: FontWeight.w900,
-              color: AppColors.accent,
-              height: 1.1,
-            )),
-            const SizedBox(height: 4),
-            Text('${game.totalHoles} HOLE ROUND', style: TextStyle(
-              fontSize: 14, 
-              fontWeight: FontWeight.w900,
-              color: AppColors.accent.withAlpha(102),
-              letterSpacing: 1.0,
-            )),
-            const SizedBox(height: 24),
             Container(
-              padding: const EdgeInsets.all(16),
+              width: double.infinity,
+              padding: const EdgeInsets.all(32),
               decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(20),
+                color: AppColors.bentoCream,
+                borderRadius: BorderRadius.circular(32),
               ),
-              child: Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.sports_golf, color: AppColors.primary, size: 20),
-                  const SizedBox(width: 12),
-                  Text(game.format.name.toUpperCase(), style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.2,
+                  Text(dateStr.toUpperCase(), style: const TextStyle(
+                    fontSize: 10, 
+                    fontWeight: FontWeight.w900, 
+                    color: Colors.black26,
+                    letterSpacing: 1.5,
+                  )),
+                  const SizedBox(height: 12),
+                  Text(game.courseName.toUpperCase(), style: const TextStyle(
+                    fontSize: 28, 
+                    fontWeight: FontWeight.w900, 
+                    color: Color(0xFF1A1A1A),
+                    height: 1.1,
                   )),
                 ],
               ),
             ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: _smallBentoInfo(
+                    color: AppColors.bentoBlue, 
+                    label: 'HOLES', 
+                    value: '${game.totalHoles}',
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _smallBentoInfo(
+                    color: AppColors.bentoOrange, 
+                    label: 'FORMAT', 
+                    value: game.format.name.toUpperCase(),
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _smallBentoInfo({required Color color, required String label, required String value}) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: const TextStyle(fontSize: 8, fontWeight: FontWeight.w900, color: Colors.black38)),
+          const SizedBox(height: 4),
+          Text(value, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Color(0xFF1A1A1A))),
+        ],
       ),
     );
   }

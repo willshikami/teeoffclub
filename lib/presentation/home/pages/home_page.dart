@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:async_redux/async_redux.dart';
 import 'package:intl/intl.dart';
 import 'package:teeoffclub/redux/app_state.dart';
@@ -10,30 +11,78 @@ import 'package:teeoffclub/presentation/home/pages/round_setup_page.dart';
 import 'package:teeoffclub/presentation/home/pages/round_details_page.dart';
 
 /// [HomeScreen] serves as the "Clubhouse" or main landing page of the application.
-/// It displays the primary action to start a new round and a scrollable history
-/// of previous golf games.
-class HomeScreen extends StatelessWidget {
+/// It follows a bento-style design with a white summary top section and a dark logging section.
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  @override
   Widget build(BuildContext context) {
     return StoreConnector<AppState, _ViewModel>(
-      vm: () => _Factory(this),
+      vm: () => _Factory(widget),
       builder: (context, vm) => Scaffold(
-        body: SafeArea(
+        backgroundColor: AppColors.sage,
+        body: Stack(
+          children: [
+            // Fixed Forest background at the bottom to prevent Sage showing at bottom overscroll
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: 256,
+              child: Container(color: AppColors.forest),
+            ),
+            // Top Sage section Fixed
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: _buildSageTopSection(context, vm),
+            ),
+            // Scrolling Bottom Forest dark section
+            Positioned.fill(
+              child: CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(
+                  parent: BouncingScrollPhysics(
+                    decelerationRate: ScrollDecelerationRate.normal,
+                  ),
+                ),
+                slivers: [
+                  // Spacer for the top section
+                  const SliverToBoxAdapter(
+                    child: SizedBox(height: 380), // Approx height of top section
+                  ),
+                  SliverToBoxAdapter(
+                    child: _buildForestBottomSection(context, vm),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Builds the top Sage container with salutation and quick actions.
+  Widget _buildSageTopSection(BuildContext context, _ViewModel vm) {
+    return Container(
+      width: double.infinity,
+      color: AppColors.sage,
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildHeader(),
-              Expanded(
-                child: CustomScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  slivers: [
-                    _buildHeroAction(context),
-                    _buildRecentRoundsSection(context, vm),
-                  ],
-                ),
-              ),
+              _buildSalutation(),
+              const SizedBox(height: 20),
+              _buildBentoQuickActions(context, vm),
             ],
           ),
         ),
@@ -41,297 +90,253 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  /// Builds the top-level branding header with the "Clubhouse" title.
-  Widget _buildHeader() {
-    return const Padding(
-      padding: EdgeInsets.all(24.0),
+  Widget _buildSalutation() {
+    final hour = DateTime.now().hour;
+    String greeting;
+    if (hour < 12) {
+      greeting = 'GOOD\nMORNING';
+    } else if (hour < 17) {
+      greeting = 'GOOD\nAFTERNOON';
+    } else {
+      greeting = 'GOOD\nEVENING';
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          greeting,
+          style: GoogleFonts.figtree(
+            fontSize: 42,
+            fontWeight: FontWeight.w900,
+            color: Colors.black,
+            height: 1.0,
+            letterSpacing: -2,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          'Mind a round of golf?',
+          style: GoogleFonts.figtree(
+            fontSize: 24,
+            color: Colors.black,
+            fontWeight: FontWeight.w400,
+            letterSpacing: -0.5,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBentoQuickActions(BuildContext context, _ViewModel vm) {
+    return Row(
+      children: [
+        // New Game Tile (Bright Lime)
+        Expanded(
+          flex: 5,
+          child: GestureDetector(
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const RoundSetupPage()),
+            ),
+            child: Container(
+              height: 132,
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: AppColors.primary,
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('NEW GAME',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 10,
+                              color: Colors.black45)),
+                      Icon(CupertinoIcons.arrow_up_right,
+                          color: Colors.black, size: 24),
+                    ],
+                  ),
+                  Spacer(),
+                  Text('Start Round',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black,
+                      )),
+                ],
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        // Rounds Counter Tile (White)
+        Expanded(
+          flex: 3,
+          child: Container(
+            height: 132,
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('ROUNDS', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 10, color: Colors.black38)),
+                const Spacer(),
+                Text('${vm.games.length}', style: const TextStyle(
+                  fontSize: 48, 
+                  fontWeight: FontWeight.w900, 
+                  color: Color(0xFF333333),
+                )),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Builds the bottom Forest dark section.
+  Widget _buildForestBottomSection(BuildContext context, _ViewModel vm) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: AppColors.forest,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(28),
+          topRight: Radius.circular(28),
+        ),
+      ),
+      child: vm.games.isEmpty 
+        ? _buildEmptyState(context)
+        : _buildLogbookList(context, vm),
+    );
+  }
+
+  Widget _buildEmptyState(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 80.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.asset(
+            'assets/cart.png',
+            height: 100,
+            fit: BoxFit.contain,
+          ),
+          const SizedBox(height: 24),
+          const Text('NO GAMES RECORDED', style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w900,
+            fontSize: 18,
+            letterSpacing: 0.5,
+          )),
+          const SizedBox(height: 8),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 48.0),
+            child: Text(
+              "Lets head to your first round, and start a round",
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.white38, fontSize: 14),
+            ),
+          ),
+          const SizedBox(height: 32),
+          ElevatedButton(
+            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const RoundSetupPage())),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.black,
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+            ),
+            child: const Text('Start Round', style: TextStyle(fontWeight: FontWeight.w900)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLogbookList(BuildContext context, _ViewModel vm) {
+    return Padding(
+      padding: const EdgeInsets.all(32),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('TEE OFF', style: TextStyle(
-            fontSize: 12, 
-            letterSpacing: 4, 
-            fontWeight: FontWeight.w900,
-            color: AppColors.primary,
-          )),
-          Text('Clubhouse', style: TextStyle(
-            fontSize: 32, 
-            fontWeight: FontWeight.w900,
+          
+           Text('Game History', style: GoogleFonts.figtree(
+            fontSize: 24,
+            fontWeight: FontWeight.w700,
             color: AppColors.accent,
-          )),
-        ],
-      ),
-    );
-  }
-
-  /// Builds the high-impact "START NEW ROUND" hero card at the top of the scroll view.
-  Widget _buildHeroAction(BuildContext context) {
-    return SliverToBoxAdapter(
-      child: GestureDetector(
-        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const RoundSetupPage())),
-        child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 24),
-          padding: const EdgeInsets.all(32),
-          decoration: BoxDecoration(
-            color: AppColors.primary,
-            borderRadius: BorderRadius.circular(40),
-          ),
-          child: const Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(Icons.add_circle, color: Colors.black, size: 48),
-              SizedBox(height: 32),
-              Text('START\nNEW ROUND', style: TextStyle(
-                color: Colors.black,
-                fontSize: 28,
-                fontWeight: FontWeight.w900,
-                height: 1.0,
-              )),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// Builds the scrollable list of historical rounds, including a "CLEAR" functionality.
-  Widget _buildRecentRoundsSection(BuildContext context, _ViewModel vm) {
-    if (vm.games.isEmpty) return const SliverToBoxAdapter(child: SizedBox.shrink());
-
-    return SliverPadding(
-      padding: const EdgeInsets.all(24),
-      sliver: SliverList(
-        delegate: SliverChildListDelegate([
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text('HISTORY', style: TextStyle(
-                fontSize: 10, 
-                letterSpacing: 2, 
-                fontWeight: FontWeight.bold,
-                color: AppColors.textSecondary,
-              )),
-              TextButton(
-                onPressed: () => _confirmClearHistory(context, vm),
-                child: const Text('CLEAR', style: TextStyle(fontSize: 10, color: Colors.white24, fontWeight: FontWeight.bold)),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
+            height: 1.0,
+          ),),
+          const SizedBox(height: 24),
           ...vm.games.map((g) => _roundTile(context, g)),
-        ]),
-      ),
-    );
-  }
-
-  void _confirmClearHistory(BuildContext context, _ViewModel vm) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        title: const Text('CLEAR HISTORY?', style: TextStyle(fontWeight: FontWeight.w900)),
-        content: const Text('This will delete all saved rounds. This action cannot be undone.'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('CANCEL')),
-          TextButton(
-            onPressed: () {
-              vm.onClearHistory();
-              Navigator.pop(context);
-            },
-            child: const Text('CLEAR ALL', style: TextStyle(color: Colors.red)),
-          ),
+          const SizedBox(height: 100), // Extra space at bottom
         ],
       ),
     );
   }
 
-  /// Displays a single round's summary in the history list. 
-  /// Tapping the tile navigates to the detailed [RoundDetailsPage].
   Widget _roundTile(BuildContext context, GolfGame game) {
-    final dateStr = DateFormat('E, d MMM').format(game.dateCreated);
+    final dateStr = DateFormat('EEE, d MMM').format(game.dateCreated);
     return GestureDetector(
       onTap: () => Navigator.push(
         context, 
         MaterialPageRoute(builder: (_) => RoundDetailsPage(game: game)),
       ),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(40),
-          border: Border.all(color: Colors.white.withAlpha(13)),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(dateStr.toUpperCase(), style: const TextStyle(
                     color: AppColors.primary, 
-                    fontSize: 10, 
+                    fontSize: 11, 
                     fontWeight: FontWeight.w900,
-                    letterSpacing: 1.5,
+                    letterSpacing: 1.0,
                   )),
-                  const SizedBox(height: 4),
-                  Text(game.courseName.toUpperCase(), style: const TextStyle(
+                  const SizedBox(height: 6),
+                  Text(game.courseName, style: const TextStyle(
                     fontWeight: FontWeight.w900, 
                     fontSize: 16,
-                    letterSpacing: 0.5,
+                    color: Colors.white,
                   )),
                   const SizedBox(height: 4),
-                  Text('${game.players.length} PLAYERS • ${game.totalHoles} HOLES', 
-                      style: TextStyle(
-                        color: AppColors.accent.withAlpha(102), 
-                        fontSize: 9, 
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 1.0,
-                      )),
+                  Text('${game.totalHoles} Holes', style: const TextStyle(
+                    color: Colors.white38, 
+                    fontSize: 14,
+                  )),
                 ],
               ),
-            ),
-            const Icon(Icons.arrow_forward_ios_rounded, color: AppColors.primary, size: 14),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class SegmentedToggleButton extends StatelessWidget {
-  const SegmentedToggleButton({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: Colors.black.withAlpha(13),
-        borderRadius: BorderRadius.circular(30),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withAlpha(26),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
+              if (game.isLive)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withAlpha(20),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.white.withAlpha(30)),
+                  ),
+                  child: const Text('ONGOING', style: TextStyle(
+                    color: AppColors.primary, 
+                    fontSize: 12, 
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.5,
+                  )),
                 ),
-              ],
-            ),
-            child: const Text('Local', style: TextStyle(fontWeight: FontWeight.bold)),
+            ],
           ),
           const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 24),
-            child: Text('Live', style: TextStyle(color: AppColors.textLight)),
-          ),
-          const CircleAvatar(
-            radius: 12,
-            backgroundColor: Colors.black,
-            child: Text('Pro', style: TextStyle(color: Colors.white, fontSize: 10)),
-          ),
-          const SizedBox(width: 8),
-        ],
-      ),
-    );
-  }
-}
-
-class CategoryCard extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final IconData icon;
-  final Color color;
-  final VoidCallback? onTap;
-
-  const CategoryCard({
-    super.key,
-    required this.title,
-    required this.subtitle,
-    required this.icon,
-    required this.color,
-    this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: AppColors.card,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: Colors.black.withAlpha(13)),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: color.withAlpha(26),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Icon(icon, color: color, size: 24),
-            ),
-            const Spacer(),
-            Text(
-              title,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              subtitle,
-              style: const TextStyle(color: AppColors.textLight, fontSize: 12),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class BottomPromptBar extends StatelessWidget {
-  const BottomPromptBar({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(40),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withAlpha(13),
-            blurRadius: 10,
-            spreadRadius: 2,
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.add, color: AppColors.textLight),
-          ),
-          const Expanded(
-            child: Text(
-              'Quick search or action...',
-              style: TextStyle(color: AppColors.textLight),
-            ),
-          ),
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.mic_none, color: AppColors.textLight),
+            padding: EdgeInsets.symmetric(vertical: 18.0),
+            child: Divider(color: Colors.white10, height: 1),
           ),
         ],
       ),
@@ -346,7 +351,6 @@ class _Factory extends VmFactory<AppState, HomeScreen, _ViewModel> {
   _ViewModel fromStore() {
     return _ViewModel(
       games: state.games,
-      isLoading: state.isLoading,
       onClearHistory: () => dispatch(ClearHistoryAction()),
     );
   }
@@ -354,24 +358,10 @@ class _Factory extends VmFactory<AppState, HomeScreen, _ViewModel> {
 
 class _ViewModel extends Vm {
   final List<GolfGame> games;
-  final bool isLoading;
   final VoidCallback onClearHistory;
 
   _ViewModel({
     required this.games,
-    required this.isLoading,
     required this.onClearHistory,
-  }) : super(equals: [isLoading]);
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is _ViewModel &&
-          runtimeType == other.runtimeType &&
-          isLoading == other.isLoading &&
-          onClearHistory == other.onClearHistory &&
-          listEquals(games, other.games);
-
-  @override
-  int get hashCode => games.hashCode ^ isLoading.hashCode ^ onClearHistory.hashCode;
+  }) : super(equals: [games]);
 }
