@@ -300,7 +300,7 @@ class RoundDetailsPage extends StatelessWidget {
                                           borderRadius: BorderRadius.circular(4),
                                         ),
                                         child: Text(
-                                          player.scoreToPar == 0 ? 'E' : '${player.scoreToPar > 0 ? '+' : ''}${player.scoreToPar}',
+                                          (holeScore.score == 0) ? 'E' : (player.scoreToPar == 0 ? 'E' : '${player.scoreToPar > 0 ? '+' : ''}${player.scoreToPar}'),
                                           style: const TextStyle(color: Colors.black, fontWeight: FontWeight.w900, fontSize: 14),
                                         ),
                                       ),
