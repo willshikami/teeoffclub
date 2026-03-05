@@ -59,11 +59,46 @@ class _ScorecardPageState extends State<ScorecardPage> {
         ),
         body: Column(
           children: [
+            _buildHoleHeader(),
             _buildHoleSelector(),
             Expanded(child: _buildScoringList(vm)),
-            _buildFooter(context),
+            _buildFooter(context, vm),
           ],
         ),
+      ),
+    );
+  }
+
+  /// Builds a prominent header showing current Hole and Par based on the course data.
+  Widget _buildHoleHeader() {
+    final int currentHolePar = (_courseDetails != null && _courseDetails!.holes.length > _currentHoleIndex) 
+        ? _courseDetails!.holes[_currentHoleIndex].par 
+        : 4;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text('HOLE ${_currentHoleIndex + 1}', style: const TextStyle(
+            fontSize: 24, 
+            fontWeight: FontWeight.w900,
+            color: AppColors.accent,
+          )),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: AppColors.primary,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text('PAR $currentHolePar', style: const TextStyle(
+              color: Colors.black,
+              fontWeight: FontWeight.w900,
+              fontSize: 12,
+              letterSpacing: 1.0,
+            )),
+          ),
+        ],
       ),
     );
   }
@@ -134,8 +169,15 @@ class _ScorecardPageState extends State<ScorecardPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(player.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                    Text('TOTAL: ${player.scoreToPar > 0 ? '+' : ''}${player.scoreToPar}', 
-                        style: const TextStyle(color: AppColors.primary, fontSize: 10, fontWeight: FontWeight.w900)),
+                    Row(
+                      children: [
+                        Text('TOTAL: ${player.scoreToPar > 0 ? '+' : ''}${player.scoreToPar}', 
+                            style: const TextStyle(color: AppColors.primary, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 0.5)),
+                        const SizedBox(width: 8),
+                        if (currentHoleScore.score > 0)
+                          _buildScoreLabel(currentHoleScore.score, currentHoleScore.par),
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -159,34 +201,100 @@ class _ScorecardPageState extends State<ScorecardPage> {
     );
   }
 
+  /// Returns a colored label based on the player's score relative to par.
+  Widget _buildScoreLabel(int score, int par) {
+    if (score == 0) return const SizedBox.shrink();
+
+    final diff = score - par;
+    String label = 'PAR';
+    Color color = AppColors.textSecondary;
+
+    if (diff == -1) {
+      label = 'BIRDIE';
+      color = Colors.greenAccent;
+    } else if (diff == -2) {
+      label = 'EAGLE';
+      color = AppColors.primary;
+    } else if (diff <= -3) {
+      label = 'ALBATROSS';
+      color = AppColors.primary;
+    } else if (diff == 1) {
+      label = 'BOGEY';
+      color = Colors.orangeAccent;
+    } else if (diff == 2) {
+      label = 'DBL BOGEY';
+      color = Colors.redAccent;
+    } else if (diff >= 3) {
+      label = 'TRIPLE+';
+      color = Colors.red;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withAlpha(38),
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: color.withAlpha(77), width: 0.5),
+      ),
+      child: Text(label, style: TextStyle(
+        color: color, 
+        fontSize: 8, 
+        fontWeight: FontWeight.w900,
+        letterSpacing: 0.5,
+      )),
+    );
+  }
+
   /// A utility widget for the increment/decrement buttons in the score entry row.
   Widget _scoreBtn(IconData icon, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(color: Colors.white.withOpacity(0.05), borderRadius: BorderRadius.circular(16)),
+        decoration: BoxDecoration(color: Colors.white.withAlpha(13), borderRadius: BorderRadius.circular(16)),
         child: Icon(icon, size: 20, color: AppColors.accent),
       ),
     );
   }
 
   /// Builds the persistent footer with the primary "SAVE & FINISH" action.
-  Widget _buildFooter(BuildContext context) {
+  Widget _buildFooter(BuildContext context, _ViewModel vm) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 0, 24, 48),
-      child: SizedBox(
-        width: double.infinity,
-        child: ElevatedButton(
-          onPressed: () => Navigator.pop(context),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.surface,
-            foregroundColor: AppColors.accent,
-            padding: const EdgeInsets.symmetric(vertical: 24),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
+      child: Column(
+        children: [
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () {
+                // Finalize the game by setting isLive to false and saving one last time.
+                final finalizedGame = _activeGame.copyWith(isLive: false);
+                vm.onUpdateGame(finalizedGame, null);
+                Navigator.pop(context);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.black,
+                padding: const EdgeInsets.symmetric(vertical: 24),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
+              ),
+              child: const Text('FINISH ROUND', style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1.5)),
+            ),
           ),
-          child: const Text('SAVE & FINISH', style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1.5)),
-        ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('SAVE & CLOSE', style: TextStyle(
+                color: AppColors.accent.withAlpha(128), 
+                fontWeight: FontWeight.w900, 
+                fontSize: 12,
+                letterSpacing: 1.2,
+              )),
+            ),
+          ),
+        ],
       ),
     );
   }

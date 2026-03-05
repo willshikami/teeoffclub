@@ -151,7 +151,7 @@ class _RoundSetupViewState extends State<_RoundSetupView> {
               decoration: InputDecoration(
                 hintText: 'Or custom name...',
                 border: InputBorder.none,
-                hintStyle: TextStyle(color: AppColors.accent.withOpacity(0.2)),
+                hintStyle: TextStyle(color: AppColors.accent.withAlpha(51)),
               ),
             ),
             const SizedBox(height: 48),
@@ -251,14 +251,16 @@ class _RoundSetupViewState extends State<_RoundSetupView> {
             dateCreated: DateTime.now(),
             format: _format,
             totalHoles: _holes,
+            isLive: true,
             players: _playerControllers.where((c) => c.text.isNotEmpty).map((c) => Player(
               id: Random().nextInt(10000).toString(),
               name: c.text,
               scores: [],
             )).toList(),
           );
-          widget.onStartRound(game);
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => ScorecardPage(game: game)));
+          final updatedGame = game.copyWith(isLive: true);
+          widget.onStartRound(updatedGame);
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => ScorecardPage(game: updatedGame)));
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
