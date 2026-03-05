@@ -20,17 +20,19 @@ class ScorecardPage extends StatefulWidget {
 class _ScorecardPageState extends State<ScorecardPage> {
   int _currentHoleIndex = 0;
   GolfCourse? _courseDetails;
+  late GolfGame _activeGame;
 
   @override
   void initState() {
     super.initState();
+    _activeGame = widget.game;
     _loadCourseDetails();
   }
 
   Future<void> _loadCourseDetails() async {
-    if (widget.game.courseId != null) {
+    if (_activeGame.courseId != null) {
       final courses = await DatabaseHelper.instance.getCourses();
-      final course = courses.firstWhere((c) => c.id == widget.game.courseId, orElse: () => courses.first);
+      final course = courses.firstWhere((c) => c.id == _activeGame.courseId, orElse: () => courses.first);
       setState(() {
         _courseDetails = course;
       });
@@ -43,11 +45,11 @@ class _ScorecardPageState extends State<ScorecardPage> {
       vm: () => _Factory(widget),
       builder: (context, vm) => Scaffold(
         appBar: AppBar(
-          title: Text(widget.game.courseName.toUpperCase()),
+          title: Text(_activeGame.courseName.toUpperCase()),
           actions: [
             IconButton(
               icon: const Icon(Icons.leaderboard_rounded, color: AppColors.primary),
-              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => LeaderboardPage(game: widget.game))),
+              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => LeaderboardPage(game: _activeGame))),
             ),
           ],
         ),
@@ -69,7 +71,7 @@ class _ScorecardPageState extends State<ScorecardPage> {
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 20),
-        itemCount: widget.game.totalHoles,
+        itemCount: _activeGame.totalHoles,
         itemBuilder: (context, index) {
           final isSelected = _currentHoleIndex == index;
           return GestureDetector(
@@ -104,9 +106,9 @@ class _ScorecardPageState extends State<ScorecardPage> {
 
     return ListView.builder(
       padding: const EdgeInsets.all(24),
-      itemCount: widget.game.players.length,
+      itemCount: _activeGame.players.length,
       itemBuilder: (context, index) {
-        final player = widget.game.players[index];
+        final player = _activeGame.players[index];
         final currentHoleScore = player.scores.firstWhere(
           (s) => s.holeNumber == _currentHoleIndex + 1,
           orElse: () => HoleScore(holeNumber: _currentHoleIndex + 1, score: 0, par: currentHolePar),
@@ -189,7 +191,7 @@ class _ScorecardPageState extends State<ScorecardPage> {
     }
 
     // Clone players and update score for the specific player
-    for (var p in widget.game.players) {
+    for (var p in _activeGame.players) {
       if (p.id == player.id) {
         final List<HoleScore> newScores = List.from(p.scores);
         final scoreIndex = newScores.indexWhere((s) => s.holeNumber == _currentHoleIndex + 1);
@@ -202,14 +204,16 @@ class _ScorecardPageState extends State<ScorecardPage> {
           newScores.add(updatedHoleScore);
         }
         
-        // Update the actual object in the widget game
+        // Update the actual object in the active game
         p.scores.clear();
         p.scores.addAll(newScores);
       }
     }
 
     // Trigger action
-    vm.onUpdateGame(widget.game);
+    vm.onUpdateGame(_activeGame, (id) {
+      _activeGame = _activeGame.copyWith(id: id);
+    });
     setState(() {});
   }
 }
@@ -220,13 +224,13 @@ class _Factory extends VmFactory<AppState, ScorecardPage, _ViewModel> {
   @override
   _ViewModel fromStore() {
     return _ViewModel(
-      onUpdateGame: (game) => dispatch(SaveGameAction(game)),
+      onUpdateGame: (game, onId) => dispatch(SaveGameAction(game, onIdAssigned: onId)),
     );
   }
 }
 
 class _ViewModel extends Vm {
-  final Function(GolfGame) onUpdateGame;
+  final Function(GolfGame, Function(int)?) onUpdateGame;
 
   _ViewModel({required this.onUpdateGame}) : super(equals: []);
 

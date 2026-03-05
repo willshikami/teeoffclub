@@ -69,7 +69,7 @@ class DatabaseHelper {
     final db = await instance.database;
     final jsonPlayers = jsonEncode(game.players.map((e) => e.toJson()).toList());
     
-    return await db.insert('games', {
+    final values = {
       'course_id': game.courseId,
       'course_name': game.courseName,
       'date_created': game.dateCreated.toIso8601String(),
@@ -77,7 +77,13 @@ class DatabaseHelper {
       'format': game.format.name,
       'total_holes': game.totalHoles,
       'is_live': game.isLive ? 1 : 0,
-    });
+    };
+
+    if (game.id != null) {
+      return await db.update('games', values, where: 'id = ?', whereArgs: [game.id]);
+    } else {
+      return await db.insert('games', values);
+    }
   }
 
   Future<void> deleteAllGames() async {

@@ -21,11 +21,16 @@ class FetchGamesAction extends AppAction {
 
 class SaveGameAction extends AppAction {
   final GolfGame game;
-  SaveGameAction(this.game);
+  final Function(int)? onIdAssigned;
+  
+  SaveGameAction(this.game, {this.onIdAssigned});
 
   @override
   Future<AppState?> reduce() async {
-    await DatabaseHelper.instance.insertGame(game);
+    final id = await DatabaseHelper.instance.insertGame(game);
+    if (game.id == null && onIdAssigned != null) {
+      onIdAssigned!(id);
+    }
     final games = await DatabaseHelper.instance.getAllGames();
     return state.copyWith(games: games);
   }
