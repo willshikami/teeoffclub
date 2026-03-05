@@ -1,3 +1,3 @@
-# TeeOff Club 🏌️‍♂️
+# TeeOff Club
 
 TeeOff Club is a simple, golf scorecard and live leaderboard application built with Flutter. It allows users to create golf rounds, input scores, and view live leaderboards as they play with their friends. The app is designed to be lightweight and easy to use, making it perfect for casual golfers who want to keep track of their scores without the complexity of more advanced golf apps.

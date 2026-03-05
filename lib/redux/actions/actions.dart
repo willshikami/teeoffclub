@@ -3,8 +3,11 @@ import 'package:teeoffclub/redux/app_state.dart';
 import 'package:teeoffclub/data/services/database_helper.dart';
 import 'package:teeoffclub/data/models/sports/golf_game.dart';
 
+/// Base class for all Redux actions in the Tee Off Club application.
 abstract class AppAction extends ReduxAction<AppState> {}
 
+/// [FetchGamesAction] coordinates the retrieval of all golf rounds from the local database.
+/// It updates the [AppState.games] list and manages the global loading indicator.
 class FetchGamesAction extends AppAction {
   @override
   Future<AppState?> reduce() async {
@@ -19,6 +22,9 @@ class FetchGamesAction extends AppAction {
   void after() => dispatch(SetLoading(false));
 }
 
+/// [SaveGameAction] persists a [GolfGame] object into SQLite.
+/// If it's a new game, it provides the generated ID via the [onIdAssigned] callback
+/// to ensure the UI can synchronize its local state and prevent duplicate entries.
 class SaveGameAction extends AppAction {
   final GolfGame game;
   final Function(int)? onIdAssigned;
@@ -36,6 +42,8 @@ class SaveGameAction extends AppAction {
   }
 }
 
+/// [ClearHistoryAction] performs a destructive operation to remove all golf game history
+/// from both the local database and the current [AppState].
 class ClearHistoryAction extends AppAction {
   @override
   Future<AppState?> reduce() async {
@@ -44,6 +52,8 @@ class ClearHistoryAction extends AppAction {
   }
 }
 
+/// [SetLoading] toggles the application's global loading state, typically used during
+/// asynchronous operations in the background.
 class SetLoading extends AppAction {
   final bool isLoading;
   SetLoading(this.isLoading);

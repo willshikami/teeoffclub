@@ -7,6 +7,9 @@ import 'package:teeoffclub/utils/app_theme.dart';
 import 'package:teeoffclub/data/models/sports/golf_game.dart';
 import 'package:teeoffclub/presentation/home/pages/round_setup_page.dart';
 
+/// [HomeScreen] serves as the "Clubhouse" or main landing page of the application.
+/// It displays the primary action to start a new round and a scrollable history
+/// of previous golf games.
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -36,6 +39,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
+  /// Builds the top-level branding header with the "Clubhouse" title.
   Widget _buildHeader() {
     return const Padding(
       padding: EdgeInsets.all(24.0),
@@ -58,6 +62,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
+  /// Builds the high-impact "START NEW ROUND" hero card at the top of the scroll view.
   Widget _buildHeroAction(BuildContext context) {
     return SliverToBoxAdapter(
       child: GestureDetector(
@@ -87,6 +92,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
+  /// Builds the scrollable list of historical rounds, including a "CLEAR" functionality.
   Widget _buildRecentRoundsSection(BuildContext context, _ViewModel vm) {
     if (vm.games.isEmpty) return const SliverToBoxAdapter(child: SizedBox.shrink());
 

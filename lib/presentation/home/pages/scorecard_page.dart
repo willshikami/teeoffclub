@@ -8,6 +8,9 @@ import 'package:teeoffclub/utils/app_theme.dart';
 import 'package:teeoffclub/redux/actions/actions.dart';
 import 'package:teeoffclub/presentation/home/pages/leaderboard_page.dart';
 
+/// [ScorecardPage] provides the active interface for recording scores during a golf round.
+/// It tracks a local [_activeGame] instance to ensure all updates are synchronized
+/// with the correct database record once an ID is assigned.
 class ScorecardPage extends StatefulWidget {
   final GolfGame game;
 
@@ -29,6 +32,7 @@ class _ScorecardPageState extends State<ScorecardPage> {
     _loadCourseDetails();
   }
 
+  /// Loads full course metadata (pars, handicaps) from the database to enable accurate scoring.
   Future<void> _loadCourseDetails() async {
     if (_activeGame.courseId != null) {
       final courses = await DatabaseHelper.instance.getCourses();
@@ -64,6 +68,7 @@ class _ScorecardPageState extends State<ScorecardPage> {
     );
   }
 
+  /// Builds a horizontal scrollable list for selecting the current hole numbers.
   Widget _buildHoleSelector() {
     return Container(
       height: 70,
@@ -98,6 +103,7 @@ class _ScorecardPageState extends State<ScorecardPage> {
     );
   }
 
+  /// Builds the main list of players and their respective stroke entry controls for the current hole.
   Widget _buildScoringList(_ViewModel vm) {
     // Current par for header if needed
     final int currentHolePar = (_courseDetails != null && _courseDetails!.holes.length > _currentHoleIndex) 
@@ -153,6 +159,7 @@ class _ScorecardPageState extends State<ScorecardPage> {
     );
   }
 
+  /// A utility widget for the increment/decrement buttons in the score entry row.
   Widget _scoreBtn(IconData icon, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
@@ -164,6 +171,7 @@ class _ScorecardPageState extends State<ScorecardPage> {
     );
   }
 
+  /// Builds the persistent footer with the primary "SAVE & FINISH" action.
   Widget _buildFooter(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 0, 24, 48),
@@ -183,6 +191,7 @@ class _ScorecardPageState extends State<ScorecardPage> {
     );
   }
 
+  /// Logic for updating a player's score and synchronizing the change with Redux and SQLite.
   void _updateScore(_ViewModel vm, Player player, int newScore) {
     // Determine the current par for this hole
     int currentPar = 4;
