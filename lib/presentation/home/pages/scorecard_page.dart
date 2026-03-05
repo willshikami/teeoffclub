@@ -232,9 +232,9 @@ class _ScorecardPageState extends State<ScorecardPage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withAlpha(38),
         borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: color.withOpacity(0.3), width: 0.5),
+        border: Border.all(color: color.withAlpha(77), width: 0.5),
       ),
       child: Text(label, style: TextStyle(
         color: color, 
@@ -251,7 +251,7 @@ class _ScorecardPageState extends State<ScorecardPage> {
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(color: Colors.white.withOpacity(0.05), borderRadius: BorderRadius.circular(16)),
+        decoration: BoxDecoration(color: Colors.white.withAlpha(13), borderRadius: BorderRadius.circular(16)),
         child: Icon(icon, size: 20, color: AppColors.accent),
       ),
     );
@@ -287,7 +287,7 @@ class _ScorecardPageState extends State<ScorecardPage> {
             child: TextButton(
               onPressed: () => Navigator.pop(context),
               child: Text('SAVE & CLOSE', style: TextStyle(
-                color: AppColors.accent.withOpacity(0.5), 
+                color: AppColors.accent.withAlpha(128), 
                 fontWeight: FontWeight.w900, 
                 fontSize: 12,
                 letterSpacing: 1.2,

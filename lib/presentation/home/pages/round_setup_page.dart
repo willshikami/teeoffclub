@@ -151,7 +151,7 @@ class _RoundSetupViewState extends State<_RoundSetupView> {
               decoration: InputDecoration(
                 hintText: 'Or custom name...',
                 border: InputBorder.none,
-                hintStyle: TextStyle(color: AppColors.accent.withOpacity(0.2)),
+                hintStyle: TextStyle(color: AppColors.accent.withAlpha(51)),
               ),
             ),
             const SizedBox(height: 48),

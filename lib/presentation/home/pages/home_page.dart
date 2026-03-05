@@ -160,7 +160,7 @@ class HomeScreen extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(40),
-          border: Border.all(color: Colors.white.withOpacity(0.05)),
+          border: Border.all(color: Colors.white.withAlpha(13)),
         ),
         child: Row(
           children: [
@@ -183,7 +183,7 @@ class HomeScreen extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text('${game.players.length} PLAYERS • ${game.totalHoles} HOLES', 
                       style: TextStyle(
-                        color: AppColors.accent.withOpacity(0.4), 
+                        color: AppColors.accent.withAlpha(102), 
                         fontSize: 9, 
                         fontWeight: FontWeight.w900,
                         letterSpacing: 1.0,
@@ -207,7 +207,7 @@ class SegmentedToggleButton extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.05),
+        color: Colors.black.withAlpha(13),
         borderRadius: BorderRadius.circular(30),
       ),
       child: Row(
@@ -220,7 +220,7 @@ class SegmentedToggleButton extends StatelessWidget {
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withAlpha(26),
                   blurRadius: 4,
                   offset: const Offset(0, 2),
                 ),
@@ -269,7 +269,7 @@ class CategoryCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.card,
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: Colors.black.withOpacity(0.05)),
+          border: Border.all(color: Colors.black.withAlpha(13)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -277,7 +277,7 @@ class CategoryCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withAlpha(26),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Icon(icon, color: color, size: 24),
@@ -311,7 +311,7 @@ class BottomPromptBar extends StatelessWidget {
         borderRadius: BorderRadius.circular(40),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withAlpha(13),
             blurRadius: 10,
             spreadRadius: 2,
           ),

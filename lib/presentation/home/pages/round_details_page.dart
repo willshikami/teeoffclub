@@ -138,7 +138,7 @@ class RoundDetailsPage extends StatelessWidget {
             Text('${game.totalHoles} HOLE ROUND', style: TextStyle(
               fontSize: 14, 
               fontWeight: FontWeight.w900,
-              color: AppColors.accent.withOpacity(0.4),
+              color: AppColors.accent.withAlpha(102),
               letterSpacing: 1.0,
             )),
             const SizedBox(height: 24),
@@ -196,7 +196,7 @@ class RoundDetailsPage extends StatelessWidget {
               decoration: BoxDecoration(
                 color: AppColors.surface,
                 borderRadius: BorderRadius.circular(24),
-                border: isWinner ? Border.all(color: AppColors.primary.withOpacity(0.3)) : null,
+                border: isWinner ? Border.all(color: AppColors.primary.withAlpha(77)) : null,
               ),
               child: Row(
                 children: [
@@ -264,7 +264,7 @@ class RoundDetailsPage extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: AppColors.surface,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.white.withOpacity(0.05)),
+                    border: Border.all(color: Colors.white.withAlpha(13)),
                   ),
                   child: Column(
                     children: [
@@ -291,9 +291,6 @@ class RoundDetailsPage extends StatelessWidget {
                                             fontSize: 16,
                                             letterSpacing: 0.5,
                                           )),
-                                          const SizedBox(width: 12),
-                                          if (holeScore.score > 0)
-                                            _buildScoreLabel(holeScore.score, holeScore.par),
                                         ],
                                       ),
                                       Container(
@@ -313,11 +310,14 @@ class RoundDetailsPage extends StatelessWidget {
                                   Row(
                                     children: [
                                       Text('PAR ${holeScore.par}', style: TextStyle(
-                                        color: AppColors.accent.withOpacity(0.5),
-                                        fontSize: 10,
+                                        color: AppColors.accent.withAlpha(128),
+                                        fontSize: 14,
                                         fontWeight: FontWeight.w900,
                                         letterSpacing: 1.0,
                                       )),
+                                      const SizedBox(width: 8),
+                                      if (holeScore.score > 0)
+                                        _buildScoreLabel(holeScore.score, holeScore.par),
                                       const Spacer(),
                                       _buildScoreStrip(holeScore.score, holeScore.par),
                                     ],
@@ -326,10 +326,10 @@ class RoundDetailsPage extends StatelessWidget {
                               ),
                             ),
                             if (game.players.indexOf(player) != game.players.length - 1)
-                              Divider(height: 1, color: Colors.white.withOpacity(0.05)),
+                              Divider(height: 1, color: Colors.white.withAlpha(13)),
                           ],
                         );
-                      }).toList(),
+                      }),
                     ],
                   ),
                 ),
@@ -373,9 +373,9 @@ class RoundDetailsPage extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withAlpha(38),
         borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: color.withOpacity(0.3), width: 0.5),
+        border: Border.all(color: color.withAlpha(77), width: 0.5),
       ),
       child: Text(label, style: TextStyle(
         color: color, 
@@ -408,7 +408,7 @@ class RoundDetailsPage extends StatelessWidget {
             child: Text('$s', style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w900,
-              color: isSelected ? Colors.white : AppColors.accent.withOpacity(0.4),
+              color: isSelected ? Colors.white : AppColors.accent.withAlpha(102),
             )),
           ),
         );
