@@ -20,7 +20,7 @@ class RoundDetailsPage extends StatelessWidget {
       vm: () => _Factory(this),
       builder: (context, vm) => Scaffold(
         appBar: AppBar(
-          title: Text(game.courseName.toUpperCase()),
+          title: const Text('ROUND SUMMARY'),
           actions: [
             if (game.id != null)
               IconButton(
@@ -127,13 +127,21 @@ class RoundDetailsPage extends StatelessWidget {
               fontWeight: FontWeight.w900,
               color: AppColors.primary,
             )),
-            const SizedBox(height: 8),
-            Text('${game.totalHoles} HOLE ROUND', style: const TextStyle(
-              fontSize: 24, 
+            const SizedBox(height: 12),
+            Text(game.courseName.toUpperCase(), style: const TextStyle(
+              fontSize: 32, 
               fontWeight: FontWeight.w900,
               color: AppColors.accent,
+              height: 1.1,
             )),
-            const SizedBox(height: 16),
+            const SizedBox(height: 4),
+            Text('${game.totalHoles} HOLE ROUND', style: TextStyle(
+              fontSize: 14, 
+              fontWeight: FontWeight.w900,
+              color: AppColors.accent.withOpacity(0.4),
+              letterSpacing: 1.0,
+            )),
+            const SizedBox(height: 24),
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -276,14 +284,14 @@ class RoundDetailsPage extends StatelessWidget {
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                      Row(
                                         children: [
                                           Text(player.name.toUpperCase(), style: const TextStyle(
                                             fontWeight: FontWeight.w900, 
                                             fontSize: 16,
                                             letterSpacing: 0.5,
                                           )),
+                                          const SizedBox(width: 12),
                                           if (holeScore.score > 0)
                                             _buildScoreLabel(holeScore.score, holeScore.par),
                                         ],
@@ -311,7 +319,7 @@ class RoundDetailsPage extends StatelessWidget {
                                         letterSpacing: 1.0,
                                       )),
                                       const Spacer(),
-                                      _scoreChip(holeScore.score, holeScore.par),
+                                      _buildScoreStrip(holeScore.score, holeScore.par),
                                     ],
                                   ),
                                 ],
@@ -378,39 +386,36 @@ class RoundDetailsPage extends StatelessWidget {
     );
   }
 
-  /// Visual indicator for the score on a specific hole.
-  /// Uses a colored background for birdies and bogies.
-  Widget _scoreChip(int score, int par) {
-    if (score == 0) return const Text('—', style: TextStyle(color: AppColors.muted));
-    
-    final diff = score - par;
-    Color color = Colors.transparent;
-    Color textColor = AppColors.accent;
+  /// Represents the visual horizontal list of scores (e.g. 1 2 3 4)
+  /// based on the par of the hole, with the actual score highlighted.
+  Widget _buildScoreStrip(int actualScore, int par) {
+    // Generate a range of scores from 1 up to the PAR of the hole.
+    final List<int> displayScores = List.generate(par, (index) => index + 1);
 
-    if (diff < 0) {
-      color = const Color(0xFF4CAF50); // Birdie or better (Green)
-      textColor = Colors.white;
-    } else if (diff > 0) {
-      color = Colors.redAccent.withOpacity(0.2); // Bogey or worse
-    }
-
-    return Container(
-      width: 32,
-      height: 32,
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(8),
-        border: diff > 0 ? Border.all(color: Colors.redAccent.withOpacity(0.5)) : null,
-      ),
-      child: Center(
-        child: Text('$score', style: TextStyle(
-          fontWeight: FontWeight.w900, 
-          fontSize: 14,
-          color: textColor,
-        )),
-      ),
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: displayScores.map((s) {
+        final isSelected = s == actualScore;
+        return Container(
+          margin: const EdgeInsets.only(left: 8),
+          width: 28,
+          height: 28,
+          decoration: BoxDecoration(
+            color: isSelected ? const Color(0xFF4CAF50) : Colors.transparent,
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Center(
+            child: Text('$s', style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w900,
+              color: isSelected ? Colors.white : AppColors.accent.withOpacity(0.4),
+            )),
+          ),
+        );
+      }).toList(),
     );
   }
+
 }
 
 class _Factory extends VmFactory<AppState, RoundDetailsPage, _ViewModel> {
