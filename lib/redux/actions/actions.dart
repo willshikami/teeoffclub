@@ -52,6 +52,19 @@ class ClearHistoryAction extends AppAction {
   }
 }
 
+/// [DeleteGameAction] removes a specific round from both the local database and the Redux state.
+class DeleteGameAction extends AppAction {
+  final int id;
+  DeleteGameAction(this.id);
+
+  @override
+  Future<AppState?> reduce() async {
+    await DatabaseHelper.instance.deleteGame(id);
+    final updatedGames = state.games.where((g) => g.id != id).toList();
+    return state.copyWith(games: updatedGames);
+  }
+}
+
 /// [SetLoading] toggles the application's global loading state, typically used during
 /// asynchronous operations in the background.
 class SetLoading extends AppAction {

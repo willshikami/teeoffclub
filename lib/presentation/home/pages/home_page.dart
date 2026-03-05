@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:async_redux/async_redux.dart';
+import 'package:intl/intl.dart';
 import 'package:teeoffclub/redux/app_state.dart';
 import 'package:teeoffclub/redux/actions/actions.dart';
 import 'package:teeoffclub/utils/app_theme.dart';
 import 'package:teeoffclub/data/models/sports/golf_game.dart';
 import 'package:teeoffclub/presentation/home/pages/round_setup_page.dart';
+import 'package:teeoffclub/presentation/home/pages/round_details_page.dart';
 
 /// [HomeScreen] serves as the "Clubhouse" or main landing page of the application.
 /// It displays the primary action to start a new round and a scrollable history
@@ -116,7 +118,7 @@ class HomeScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          ...vm.games.map((g) => _roundTile(g)),
+          ...vm.games.map((g) => _roundTile(context, g)),
         ]),
       ),
     );
@@ -143,28 +145,55 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _roundTile(GolfGame game) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(32),
+  /// Displays a single round's summary in the history list. 
+  /// Tapping the tile navigates to the detailed [RoundDetailsPage].
+  Widget _roundTile(BuildContext context, GolfGame game) {
+    final dateStr = DateFormat('E, d MMM').format(game.dateCreated);
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context, 
+        MaterialPageRoute(builder: (_) => RoundDetailsPage(game: game)),
       ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(game.courseName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                Text('${game.players.length} PLAYERS • ${game.totalHoles} HOLES', 
-                    style: const TextStyle(color: AppColors.textSecondary, fontSize: 10, fontWeight: FontWeight.bold)),
-              ],
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(40),
+          border: Border.all(color: Colors.white.withOpacity(0.05)),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(dateStr.toUpperCase(), style: const TextStyle(
+                    color: AppColors.primary, 
+                    fontSize: 10, 
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1.5,
+                  )),
+                  const SizedBox(height: 4),
+                  Text(game.courseName.toUpperCase(), style: const TextStyle(
+                    fontWeight: FontWeight.w900, 
+                    fontSize: 16,
+                    letterSpacing: 0.5,
+                  )),
+                  const SizedBox(height: 4),
+                  Text('${game.players.length} PLAYERS • ${game.totalHoles} HOLES', 
+                      style: TextStyle(
+                        color: AppColors.accent.withOpacity(0.4), 
+                        fontSize: 9, 
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1.0,
+                      )),
+                ],
+              ),
             ),
-          ),
-          const Icon(Icons.chevron_right, color: AppColors.textSecondary),
-        ],
+            const Icon(Icons.arrow_forward_ios_rounded, color: AppColors.primary, size: 14),
+          ],
+        ),
       ),
     );
   }

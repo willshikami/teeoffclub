@@ -103,6 +103,12 @@ class DatabaseHelper {
     await db.delete('games');
   }
 
+  /// Deletes a specific game record from the database by its unique [id].
+  Future<void> deleteGame(int id) async {
+    final db = await database;
+    await db.delete('games', where: 'id = ?', whereArgs: [id]);
+  }
+
   // COURSE METHODS
 
   /// Performs a batch insertion of multiple [GolfCourse] records into the database.
