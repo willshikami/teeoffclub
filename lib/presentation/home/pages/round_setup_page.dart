@@ -11,6 +11,9 @@ import 'package:teeoffclub/utils/app_theme.dart';
 
 import 'package:teeoffclub/presentation/home/pages/scorecard_page.dart';
 
+/// [RoundSetupPage] provides the configuration screen for starting a new golf round.
+/// It allows users to select a Kenyan golf course, define the number of holes,
+/// and add up to 4 players.
 class RoundSetupPage extends StatelessWidget {
   const RoundSetupPage({super.key});
 
@@ -48,8 +51,9 @@ class _RoundSetupViewState extends State<_RoundSetupView> {
     _loadCourses();
   }
 
+  /// Fetches the available Kenyan golf courses from the local database.
+  /// If the DB is empty or outdated, it seeds it with [GolfCourseData].
   Future<void> _loadCourses() async {
-    // Force refresh the courses in the DB to use the new Kenyan clubs
     final mock = GolfCourseData.getCourses();
     await DatabaseHelper.instance.insertCourses(mock);
     _availableCourses = mock;
@@ -65,6 +69,7 @@ class _RoundSetupViewState extends State<_RoundSetupView> {
     super.dispose();
   }
 
+  /// Updates the selected course and automatically sets the hole count based on course metadata.
   void _onCourseSelected(GolfCourse course) {
     setState(() {
       _selectedCourse = course;
@@ -73,6 +78,7 @@ class _RoundSetupViewState extends State<_RoundSetupView> {
     });
   }
 
+  /// Adds a new player to the round, capped at 4 for performance and UI constraints.
   void _addPlayer() {
     if (_playerControllers.length < 4) {
       setState(() {
