@@ -9,6 +9,7 @@ import 'package:teeoffclub/utils/app_theme.dart';
 import 'package:teeoffclub/data/models/sports/golf_game.dart';
 import 'package:teeoffclub/presentation/home/pages/round_setup_page.dart';
 import 'package:teeoffclub/presentation/home/pages/round_details_page.dart';
+import 'package:teeoffclub/presentation/home/pages/range_setup_page.dart';
 
 /// [HomeScreen] serves as the "Clubhouse" or main landing page of the application.
 /// It follows a bento-style design with a white summary top section and a dark logging section.
@@ -163,105 +164,75 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Expanded(
+                child: Text(
+                  game.courseName.isEmpty
+                      ? 'Karen Country Club'
+                      : game.courseName,
+                  style: GoogleFonts.figtree(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                    letterSpacing: -0.2,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 4),
+              // User's Current Stats Section
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Expanded(
-                    child: Text(
-                      game.courseName.isEmpty
-                          ? 'Karen Country Club'
-                          : game.courseName,
-                      style: GoogleFonts.figtree(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                        letterSpacing: -0.2,
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'HOLE 7', // Placeholder for current hole
+                        style: GoogleFonts.figtree(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                          letterSpacing: 0.5,
+                        ),
                       ),
-                    ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'PAR 4', // Placeholder for current par
+                        style: GoogleFonts.figtree(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white.withOpacity(0.6),
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 12),
-                  // Live Game Badge
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 6,
-                          height: 6,
-                          decoration: const BoxDecoration(
-                            color: AppColors.primary,
-                            shape: BoxShape.circle,
-                          ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        '+3', // Placeholder for user's relative to par score
+                        style: GoogleFonts.figtree(
+                          fontSize: 32,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.primary,
+                          height: 1.0,
                         ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'LIVE',
-                          style: GoogleFonts.figtree(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w900,
-                            color: AppColors.primary,
-                            letterSpacing: 1.0,
-                          ),
+                      ),
+                      Text(
+                        'OVER PAR',
+                        style: GoogleFonts.figtree(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.primary.withOpacity(0.5),
+                          letterSpacing: 1.0,
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-              const SizedBox(height: 24),
-              // Leaderboard Module
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Column(
-                  children: [
-                    ...(() {
-                      // Sort players by total strokes descending (highest score first)
-                      final sortedPlayers = List<Player>.from(game.players)
-                        ..sort((a, b) => b.totalStrokes.compareTo(a.totalStrokes));
-                      return sortedPlayers.take(2).toList();
-                    }())
-                        .asMap()
-                        .entries
-                        .map((entry) {
-                      final index = entry.key;
-                      final player = entry.value;
-                      // Logic for current hole/score per player would go here
-                      // Using placeholders for now as per previous design
-                      return Column(
-                        children: [
-                          _buildLeaderboardRow(
-                            player.name,
-                            'Hole ${7 + index}', // Simulated hole progress
-                            index == 0 ? '+3' : '+${3 + index * 2}', // Simulated score
-                          ),
-                          if (index <
-                              (game.players.length > 2
-                                      ? 2
-                                      : game.players.length) -
-                                  1)
-                            const Padding(
-                              padding: EdgeInsets.symmetric(vertical: 8.0),
-                              child: Divider(color: Colors.white10, height: 1),
-                            ),
-                        ],
-                      );
-                    }),
-                  ],
-                ),
-              ),
               const SizedBox(height: 20),
-              // Navigation prompt now below leaderboard
+              // Navigation prompt now below stats
               Row(
                 children: [
                   Container(
@@ -298,41 +269,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildLeaderboardRow(String name, String hole, String score) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          name,
-          style: GoogleFonts.figtree(
-            color: Colors.white,
-            fontWeight: FontWeight.w500,
-            fontSize: 14,
-          ),
-        ),
-        Row(
-          children: [
-            Text(
-              hole,
-              style: GoogleFonts.figtree(
-                color: Colors.white54,
-                fontSize: 12,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Text(
-              score,
-              style: GoogleFonts.figtree(
-                color: AppColors.primary,
-                fontWeight: FontWeight.w700,
-                fontSize: 14,
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
 
   Widget _buildSalutation() {
     final hour = DateTime.now().hour;
@@ -425,34 +361,52 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         const SizedBox(width: 12),
-        // Best Score Tile (White)
+        // Range Session Tile (White)
         Expanded(
           flex: 3,
-          child: Container(
-            height: 132,
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const RangeSetupPage()),
+                );
+              },
               borderRadius: BorderRadius.circular(24),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('BEST SCORE',
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 10,
-                        color: Colors.black38)),
-                const Spacer(),
-                Text(
-                  _getBestScore(vm.games),
-                  style: const TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF333333),
-                  ),
+              child: Ink(
+                height: 132,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(24),
                 ),
-              ],
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('RANGE SESSION',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 10,
+                                color: Colors.black45)),
+                        Icon(CupertinoIcons.arrow_up_right,
+                            color: Colors.black, size: 24),
+                      ],
+                    ),
+                    const Spacer(),
+                    const SizedBox(height: 8),
+                    Text('Start Session',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black,
+                        ),),
+                  ],
+                ),
+              ),
             ),
           ),
         ),
@@ -460,24 +414,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  String _getBestScore(List<GolfGame> games) {
-    if (games.isEmpty) return '--';
-    
-    // Simplistic best score logic: lowest total strokes among finished games
-    // In a real app, this might be relative to par or specifically for the user
-    int? best;
-    for (var game in games) {
-      if (game.isLive) continue;
-      for (var player in game.players) {
-        // Assuming the first player is the user for this summary
-        final score = player.totalStrokes;
-        if (score > 0 && (best == null || score < best)) {
-          best = score;
-        }
-      }
-    }
-    return best?.toString() ?? '--';
-  }
 
 
   Widget _buildEmptyState(BuildContext context) {

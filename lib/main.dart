@@ -3,7 +3,7 @@ import 'package:async_redux/async_redux.dart';
 import 'package:teeoffclub/redux/app_state.dart';
 import 'package:teeoffclub/redux/actions/actions.dart';
 import 'package:teeoffclub/utils/app_theme.dart';
-import 'package:teeoffclub/presentation/home/pages/home_page.dart';
+import 'package:teeoffclub/presentation/main_scaffold.dart';
 
 late Store<AppState> store;
 
@@ -27,7 +27,7 @@ class TeeOffClubApp extends StatelessWidget {
         title: 'TeeOff Club',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
-        home: const HomeScreen(),
+        home: const MainScaffold(),
       ),
     );
   }
