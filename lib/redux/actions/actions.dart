@@ -2,6 +2,7 @@ import 'package:async_redux/async_redux.dart';
 import 'package:teeoffclub/redux/app_state.dart';
 import 'package:teeoffclub/data/services/database_helper.dart';
 import 'package:teeoffclub/data/models/sports/golf_game.dart';
+import 'package:teeoffclub/data/models/sports/range_session.dart';
 
 /// Base class for all Redux actions in the Tee Off Club application.
 abstract class AppAction extends ReduxAction<AppState> {}
@@ -20,6 +21,18 @@ class FetchGamesAction extends AppAction {
 
   @override
   void after() => dispatch(SetLoading(false));
+}
+
+/// [SaveRangeSessionAction] saves a range practice session to the state.
+class SaveRangeSessionAction extends AppAction {
+  final RangeSession session;
+  SaveRangeSessionAction(this.session);
+
+  @override
+  AppState reduce() {
+    final sessions = List<RangeSession>.from(state.rangeSessions)..add(session);
+    return state.copyWith(rangeSessions: sessions);
+  }
 }
 
 /// [SaveGameAction] persists a [GolfGame] object into SQLite.
